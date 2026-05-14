@@ -22,7 +22,7 @@ class TrafficLightSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TrafficLight
-        fields = ('id', 'road', 'road_name', 'road_is_main', 'state', 'manual_override', 'updated_at')
+        fields = ('id', 'road', 'road_name', 'road_is_main', 'state', 'manual_override', 'green_duration', 'updated_at')
         read_only_fields = ('updated_at',)
 
 

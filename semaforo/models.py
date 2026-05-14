@@ -49,6 +49,7 @@ class TrafficLight(models.Model):
     # When True the frontend/operator has set this state manually;
     # the ESP32 respects it instead of following sensor logic.
     manual_override = models.BooleanField(default=False)
+    green_duration  = models.PositiveSmallIntegerField(default=5)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:

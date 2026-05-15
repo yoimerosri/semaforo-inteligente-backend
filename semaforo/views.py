@@ -77,6 +77,29 @@ def report_state(request):
 
 
 # ==============================================================================
+# IoT endpoint — ESP32 startup: clear stale overrides + sensors, reset to default
+# ==============================================================================
+
+@api_view(['POST'])
+@permission_classes([IoTApiKeyPermission])
+def startup_reset(request):
+    """
+    Called by ESP32 on every boot.
+    Clears manual overrides and stale sensor detections, then runs control_traffic()
+    so the backend always reflects the default state (main roads GREEN) on startup.
+    """
+    from sensores.models import Sensor
+    from .services import control_traffic
+
+    TrafficLight.objects.update(manual_override=False)
+    Sensor.objects.update(vehicle_detected=False)
+    control_traffic()
+
+    lights = TrafficLight.objects.select_related('road').all()
+    return Response(TrafficLightSerializer(lights, many=True).data)
+
+
+# ==============================================================================
 # Read lights — used by ESP32 to check for manual overrides
 # ==============================================================================
 

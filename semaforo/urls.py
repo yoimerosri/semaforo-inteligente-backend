@@ -8,6 +8,9 @@ router.register('roads', views.RoadViewSet, basename='road')
 router.register('intersections', views.IntersectionViewSet, basename='intersection')
 
 urlpatterns = [
+    # ESP32 startup: clear stale state and reset to default (API key required)
+    path('startup/', views.startup_reset, name='semaforo-startup'),
+
     # Read all lights (ESP32 + frontend)
     path('lights/', views.get_lights, name='semaforo-lights'),
 

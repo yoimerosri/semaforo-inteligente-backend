@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     'trafico',
     'usuarios',
     'dispositivos',
+    'infractions',
 ]
 
 AUTH_USER_MODEL = 'usuarios.Usuario'
@@ -64,11 +65,12 @@ DATABASES = {
         'ENGINE': config('DB_ENGINE', default='django.db.backends.mysql'),
         'NAME': config('DB_NAME', default='railway'),
         'USER': config('DB_USER', default='root'),
-        'PASSWORD': config('DB_PASSWORD', default='pfIIMaRyHiWbsiEPYFjjkWKpejNoYfpC'),
-        'HOST': config('DB_HOST', default='gondola.proxy.rlwy.net'),
-        'PORT': config('DB_PORT', default='11522'),
+        'PASSWORD': config('DB_PASSWORD', default='GLHLcyalNGWZgUFDDLAsMYlJGYptMjTI'),
+        'HOST': config('DB_HOST', default='shinkansen.proxy.rlwy.net'),
+        'PORT': config('DB_PORT', default='44789'),
         'OPTIONS': {
             'charset': 'utf8mb4',
+            'connect_timeout': 30,
         },
     }
 }
@@ -157,3 +159,9 @@ IOT_API_KEY = config('IOT_API_KEY', default='dev-iot-secret-change-me')
 # Needed when Django runs behind ngrok or any HTTPS reverse proxy
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# ==============================================================================
+# Media files (infractions photos)
+# ==============================================================================
+MEDIA_URL  = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'

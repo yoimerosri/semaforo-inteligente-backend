@@ -13,9 +13,9 @@ from .serializers import InfractionSerializer
 logger = logging.getLogger(__name__)
 
 
-class InfractionViewSet(viewsets.ReadOnlyModelViewSet):
+class InfractionViewSet(viewsets.ModelViewSet):
     """
-    Lista y detalle de infracciones (lectura para el frontend).
+    Lista, detalle, edición de placa y eliminación de infracciones.
     La creación ocurre desde el endpoint report/ (visión con tracking).
     La revisión (verificar / desestimar) se hace con el action update_status.
     """
@@ -26,6 +26,35 @@ class InfractionViewSet(viewsets.ReadOnlyModelViewSet):
     search_fields      = ['road__name', 'notes']
     ordering_fields    = ['timestamp', 'confidence', 'vehicle_count']
     ordering           = ['-timestamp']
+
+    # Bloquea create/update genéricos — la creación solo va por report/
+    def create(self, request, *args, **kwargs):
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def update(self, request, *args, **kwargs):
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def partial_update(self, request, *args, **kwargs):
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        logger.info("[INFRACCIÓN] ELIMINADA — id=%d  via=%s", instance.id, instance.road.name)
+        instance.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=['patch'], url_path='placa')
+    def update_plate(self, request, pk=None):
+        """
+        PATCH /api/infractions/<id>/placa/
+        Payload: { "plate_number": "ABC123" }  — vacío o null limpia la placa.
+        """
+        infraction = self.get_object()
+        plate = (request.data.get('plate_number') or '').strip().upper() or None
+        infraction.plate_number = plate
+        infraction.save(update_fields=['plate_number'])
+        logger.info("[INFRACCIÓN] id=%d  placa actualizada → %s", infraction.id, plate or '—')
+        return Response(self.get_serializer(infraction).data)
 
     @action(detail=True, methods=['patch'], url_path='estado')
     def update_status(self, request, pk=None):

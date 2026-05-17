@@ -1,8 +1,5 @@
-import base64
 import logging
-import time
 
-from django.core.files.base import ContentFile
 from rest_framework import status, viewsets
 from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.permissions import IsAuthenticated
@@ -103,20 +100,18 @@ def report_infraction(request):
         traffic_light_state=light_state,
         vehicle_count=1,
         confidence=1.0,
+        photo_b64=request.data.get('photo') or '',
+        plate_number=(request.data.get('plate_number') or '').strip().upper() or None,
     )
-
-    photo_b64 = request.data.get('photo')
-    if photo_b64:
-        try:
-            img_bytes = base64.b64decode(photo_b64)
-            filename  = f"inf_{road_id}_{int(time.time())}.jpg"
-            intr.photo.save(filename, ContentFile(img_bytes), save=False)
-        except Exception as exc:
-            logger.warning("[INFRACCIÓN] No se pudo guardar la foto: %s", exc)
-
     intr.save()
 
-    logger.warning("[INFRACCIÓN] CREADA — id=%d  via=%-20s  foto=%s",
-                   intr.id, road.name, "sí" if intr.photo else "no")
+    logger.warning("[INFRACCIÓN] CREADA — id=%d  via=%-20s  placa=%-8s  foto=%s",
+                   intr.id, road.name,
+                   intr.plate_number or '—',
+                   "sí" if intr.photo_b64 else "no")
 
-    return Response({'created': True, 'id': intr.id}, status=status.HTTP_201_CREATED)
+    return Response({
+        'created': True,
+        'id': intr.id,
+        'plate': intr.plate_number,
+    }, status=status.HTTP_201_CREATED)

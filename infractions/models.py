@@ -13,7 +13,8 @@ class Infraction(models.Model):
     traffic_light_state = models.CharField(max_length=10)
     vehicle_count       = models.PositiveSmallIntegerField(default=1)
     confidence          = models.FloatField(default=0.0)
-    photo               = models.ImageField(upload_to='infractions/%Y/%m/%d/', blank=True, null=True)
+    photo_b64           = models.TextField(blank=True, null=True)
+    plate_number        = models.CharField(max_length=20, blank=True, null=True, verbose_name='Placa')
     status              = models.CharField(max_length=15, choices=Status.choices, default=Status.PENDING)
     notes               = models.TextField(blank=True)
 

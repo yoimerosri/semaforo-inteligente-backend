@@ -18,6 +18,7 @@ class InfractionSerializer(serializers.ModelSerializer):
             'traffic_light_state', 'traffic_light_state_display',
             'vehicle_count', 'confidence',
             'photo_url',
+            'plate_number',
             'status', 'status_display',
             'notes',
         ]
@@ -25,16 +26,13 @@ class InfractionSerializer(serializers.ModelSerializer):
             'id', 'road', 'road_name', 'timestamp',
             'traffic_light_state', 'traffic_light_state_display',
             'vehicle_count', 'confidence', 'photo_url',
-            'status_display',
+            'plate_number', 'status_display',
         ]
 
     def get_traffic_light_state_display(self, obj):
         return _STATE_LABELS.get(obj.traffic_light_state, obj.traffic_light_state)
 
     def get_photo_url(self, obj):
-        if not obj.photo:
-            return None
-        request = self.context.get('request')
-        if request:
-            return request.build_absolute_uri(obj.photo.url)
-        return obj.photo.url
+        if obj.photo_b64:
+            return f"data:image/jpeg;base64,{obj.photo_b64}"
+        return None

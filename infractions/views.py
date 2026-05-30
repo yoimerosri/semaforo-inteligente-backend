@@ -82,6 +82,26 @@ class InfractionViewSet(viewsets.ModelViewSet):
         return Response(self.get_serializer(infraction).data)
 
 
+@api_view(['PATCH'])
+@permission_classes([IoTApiKeyPermission | IsAuthenticated])
+def update_plate_view(request, pk):
+    """
+    PATCH /api/infractions/<pk>/placa/
+    Acepta API Key IoT (módulo visión) o JWT (frontend).
+    Payload: { "plate_number": "ABC123" }  — vacío limpia la placa.
+    """
+    try:
+        infraction = Infraction.objects.get(pk=pk)
+    except Infraction.DoesNotExist:
+        return Response({'error': 'No encontrada.'}, status=status.HTTP_404_NOT_FOUND)
+
+    plate = (request.data.get('plate_number') or '').strip().upper() or None
+    infraction.plate_number = plate
+    infraction.save(update_fields=['plate_number'])
+    logger.info("[INFRACCIÓN] id=%d  placa actualizada → %s", infraction.id, plate or '—')
+    return Response(InfractionSerializer(infraction).data)
+
+
 @api_view(['POST'])
 @permission_classes([IoTApiKeyPermission])
 def report_infraction(request):

@@ -5,7 +5,7 @@ from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from usuarios.permissions import IoTApiKeyPermission
+from usuarios.permissions import IoTApiKeyPermission, IsAuthenticatedOrIoTKey
 from semaforo.models import Road
 from .models import Infraction
 from .serializers import InfractionSerializer
@@ -43,20 +43,6 @@ class InfractionViewSet(viewsets.ModelViewSet):
         instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=True, methods=['patch'], url_path='placa',
-            permission_classes=[IsAuthenticated | IoTApiKeyPermission])
-    def update_plate(self, request, pk=None):
-        """
-        PATCH /api/infractions/<id>/placa/
-        Payload: { "plate_number": "ABC123" }  — vacío o null limpia la placa.
-        """
-        infraction = self.get_object()
-        plate = (request.data.get('plate_number') or '').strip().upper() or None
-        infraction.plate_number = plate
-        infraction.save(update_fields=['plate_number'])
-        logger.info("[INFRACCIÓN] id=%d  placa actualizada → %s", infraction.id, plate or '—')
-        return Response(self.get_serializer(infraction).data)
-
     @action(detail=True, methods=['patch'], url_path='estado')
     def update_status(self, request, pk=None):
         """
@@ -83,7 +69,7 @@ class InfractionViewSet(viewsets.ModelViewSet):
 
 
 @api_view(['PATCH'])
-@permission_classes([IoTApiKeyPermission | IsAuthenticated])
+@permission_classes([IsAuthenticatedOrIoTKey])
 def update_plate_view(request, pk):
     """
     PATCH /api/infractions/<pk>/placa/

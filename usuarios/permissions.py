@@ -33,3 +33,16 @@ class IoTApiKeyPermission(BasePermission):
     def has_permission(self, request, view):
         api_key = request.headers.get('X-Api-Key', '')
         return api_key == settings.IOT_API_KEY
+
+
+class IsAuthenticatedOrIoTKey(BasePermission):
+    """
+    Permite acceso con JWT de usuario autenticado O con API Key de IoT.
+    Evita el operador | que requiere metaclase compatible.
+    """
+
+    def has_permission(self, request, view):
+        api_key = request.headers.get('X-Api-Key', '')
+        if api_key == settings.IOT_API_KEY:
+            return True
+        return bool(request.user and request.user.is_authenticated)

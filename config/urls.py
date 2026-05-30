@@ -3,6 +3,8 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 
+from infractions.views import update_plate_view
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include([
@@ -13,8 +15,6 @@ urlpatterns = [
         path('semaforo/', include('semaforo.urls')),
 
         # Sensor readings from ESP32
-        # /api/sensor/update/ — IoT write
-        # /api/sensor/        — DRF read-only list
         path('sensor/', include('sensores.urls')),
 
         # Traffic history log
@@ -22,6 +22,9 @@ urlpatterns = [
 
         # IoT device registry
         path('dispositivos/', include('dispositivos.urls')),
+
+        # Plate update — registered here to avoid DRF router conflicts
+        path('infractions/set-plate/<int:pk>/', update_plate_view, name='infraction-set-plate'),
 
         # Photo-infractions (vehicles crossing on red)
         path('infractions/', include('infractions.urls')),

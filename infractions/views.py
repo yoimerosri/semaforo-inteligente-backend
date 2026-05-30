@@ -92,6 +92,28 @@ class InfractionViewSet(viewsets.ModelViewSet):
 
 
 
+@api_view(['PATCH'])
+@authentication_classes([])
+@permission_classes([AllowAny])
+def update_plate_view(request, pk):
+    """PATCH /api/infractions/set-plate/<pk>/ — actualiza placa via IoT key o JWT."""
+    api_key = request.headers.get('X-Api-Key', '')
+    is_iot  = api_key == settings.IOT_API_KEY
+    is_user = bool(request.user and request.user.is_authenticated)
+    logger.info("[PLACA] recibido id=%s  iot=%s  user=%s", pk, is_iot, is_user)
+    if not (is_iot or is_user):
+        return Response({'error': 'Autenticación requerida.'}, status=status.HTTP_403_FORBIDDEN)
+    try:
+        infraction = Infraction.objects.get(pk=pk)
+    except Infraction.DoesNotExist:
+        return Response({'error': 'No encontrada.'}, status=status.HTTP_404_NOT_FOUND)
+    plate = (request.data.get('plate_number') or '').strip().upper() or None
+    infraction.plate_number = plate
+    infraction.save(update_fields=['plate_number'])
+    logger.info("[INFRACCIÓN] id=%s  placa actualizada → %s", pk, plate or '—')
+    return Response(InfractionSerializer(infraction).data)
+
+
 @api_view(['POST'])
 @permission_classes([IoTApiKeyPermission])
 def report_infraction(request):

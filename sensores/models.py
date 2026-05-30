@@ -1,7 +1,6 @@
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.utils import timezone
 
 from semaforo.models import Road
 
@@ -15,7 +14,7 @@ class Sensor(models.Model):
     vehicle_detected = models.BooleanField(default=False)
     vehicle_count    = models.PositiveSmallIntegerField(default=0)
     confidence       = models.FloatField(default=0.0)
-    updated_at       = models.DateTimeField(default=timezone.now)
+    updated_at       = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = 'Sensor'

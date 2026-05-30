@@ -14,6 +14,9 @@ urlpatterns = [
     # Read all lights (ESP32 + frontend)
     path('lights/', views.get_lights, name='semaforo-lights'),
 
+    # Watchdog — frontend calls on load to reset stale sensors
+    path('watchdog/', views.watchdog, name='semaforo-watchdog'),
+
     # Manual override from frontend (JWT required)
     path('control/', views.manual_control, name='semaforo-manual-control'),
     path('control/<int:road_id>/release/', views.release_override, name='semaforo-release-override'),

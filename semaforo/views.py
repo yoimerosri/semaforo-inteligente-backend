@@ -103,6 +103,28 @@ def startup_reset(request):
 # Read lights — used by ESP32 to check for manual overrides
 # ==============================================================================
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def watchdog(request):
+    """
+    POST /api/semaforo/watchdog/
+    Frontend llama este endpoint al abrir el dashboard y periódicamente.
+    Dispara control_traffic() con la regla de sensores viejos activa,
+    lo que resetea el semáforo al estado por defecto si el ESP32 está offline.
+    """
+    from sensores.models import Sensor
+    from .services import control_traffic
+    from datetime import timedelta
+    from django.utils import timezone
+
+    stale_cutoff = timezone.now() - timedelta(seconds=15)
+    Sensor.objects.filter(updated_at__lt=stale_cutoff).update(vehicle_detected=False)
+    control_traffic()
+
+    lights = TrafficLight.objects.select_related('road').all()
+    return Response(TrafficLightSerializer(lights, many=True).data)
+
+
 @api_view(['GET'])
 @permission_classes([IoTApiKeyPermission | IsAuthenticated])
 def get_lights(request):

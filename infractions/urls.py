@@ -8,5 +8,5 @@ router.register(r'', InfractionViewSet, basename='infraction')
 
 urlpatterns = [
     path('report/', report_infraction, name='infraction-report'),
-    path('<int:pk>/placa/', update_plate_view, name='infraction-placa'),
+    path('set-plate/<int:pk>/', update_plate_view, name='infraction-placa'),
 ] + router.urls

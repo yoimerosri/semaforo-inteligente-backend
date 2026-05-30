@@ -44,6 +44,28 @@ class InfractionViewSet(viewsets.ModelViewSet):
         instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    @action(detail=True, methods=['patch'], url_path='set-plate',
+            authentication_classes=[], permission_classes=[AllowAny])
+    def set_plate(self, request, pk=None):
+        """
+        PATCH /api/infractions/<pk>/set-plate/
+        Acepta API Key IoT (módulo visión) o JWT (frontend).
+        """
+        api_key = request.headers.get('X-Api-Key', '')
+        is_iot  = api_key == settings.IOT_API_KEY
+        is_user = bool(request.user and request.user.is_authenticated)
+        logger.info("[PLACA] recibido id=%s  iot=%s  user=%s  key_prefix=%s",
+                    pk, is_iot, is_user, api_key[:8] if api_key else 'EMPTY')
+        if not (is_iot or is_user):
+            return Response({'error': 'Autenticación requerida.'}, status=status.HTTP_403_FORBIDDEN)
+
+        infraction = self.get_object()
+        plate = (request.data.get('plate_number') or '').strip().upper() or None
+        infraction.plate_number = plate
+        infraction.save(update_fields=['plate_number'])
+        logger.info("[INFRACCIÓN] id=%s  placa actualizada → %s", pk, plate or '—')
+        return Response(self.get_serializer(infraction).data)
+
     @action(detail=True, methods=['patch'], url_path='estado')
     def update_status(self, request, pk=None):
         """
@@ -68,34 +90,6 @@ class InfractionViewSet(viewsets.ModelViewSet):
                     infraction.id, infraction.road.name, new_status)
         return Response(self.get_serializer(infraction).data)
 
-
-@api_view(['PATCH'])
-@authentication_classes([])
-@permission_classes([AllowAny])
-def update_plate_view(request, pk):
-    """
-    PATCH /api/infractions/<pk>/placa/
-    Acepta API Key IoT (módulo visión) o JWT (frontend).
-    Payload: { "plate_number": "ABC123" }  — vacío limpia la placa.
-    """
-    api_key = request.headers.get('X-Api-Key', '')
-    is_iot  = api_key == settings.IOT_API_KEY
-    is_user = bool(request.user and request.user.is_authenticated)
-    logger.info("[PLACA] recibido id=%d  iot=%s  user=%s  key_prefix=%s",
-                pk, is_iot, is_user, api_key[:8] if api_key else 'EMPTY')
-    if not (is_iot or is_user):
-        return Response({'error': 'Autenticación requerida.'}, status=status.HTTP_403_FORBIDDEN)
-
-    try:
-        infraction = Infraction.objects.get(pk=pk)
-    except Infraction.DoesNotExist:
-        return Response({'error': 'No encontrada.'}, status=status.HTTP_404_NOT_FOUND)
-
-    plate = (request.data.get('plate_number') or '').strip().upper() or None
-    infraction.plate_number = plate
-    infraction.save(update_fields=['plate_number'])
-    logger.info("[INFRACCIÓN] id=%d  placa actualizada → %s", infraction.id, plate or '—')
-    return Response(InfractionSerializer(infraction).data)
 
 
 @api_view(['POST'])

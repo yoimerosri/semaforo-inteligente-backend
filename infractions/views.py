@@ -1,8 +1,9 @@
 import logging
 
+from django.conf import settings
 from rest_framework import status, viewsets
 from rest_framework.decorators import api_view, permission_classes, action, authentication_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
 from usuarios.permissions import IoTApiKeyPermission
@@ -70,13 +71,21 @@ class InfractionViewSet(viewsets.ModelViewSet):
 
 @api_view(['PATCH'])
 @authentication_classes([])
-@permission_classes([IoTApiKeyPermission])
+@permission_classes([AllowAny])
 def update_plate_view(request, pk):
     """
     PATCH /api/infractions/<pk>/placa/
     Acepta API Key IoT (módulo visión) o JWT (frontend).
     Payload: { "plate_number": "ABC123" }  — vacío limpia la placa.
     """
+    api_key = request.headers.get('X-Api-Key', '')
+    is_iot  = api_key == settings.IOT_API_KEY
+    is_user = bool(request.user and request.user.is_authenticated)
+    logger.info("[PLACA] recibido id=%d  iot=%s  user=%s  key_prefix=%s",
+                pk, is_iot, is_user, api_key[:8] if api_key else 'EMPTY')
+    if not (is_iot or is_user):
+        return Response({'error': 'Autenticación requerida.'}, status=status.HTTP_403_FORBIDDEN)
+
     try:
         infraction = Infraction.objects.get(pk=pk)
     except Infraction.DoesNotExist:

@@ -43,7 +43,8 @@ class InfractionViewSet(viewsets.ModelViewSet):
         instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=True, methods=['patch'], url_path='placa')
+    @action(detail=True, methods=['patch'], url_path='placa',
+            permission_classes=[IsAuthenticated | IoTApiKeyPermission])
     def update_plate(self, request, pk=None):
         """
         PATCH /api/infractions/<id>/placa/
@@ -124,11 +125,20 @@ def report_infraction(request):
         return Response({'created': False, 'reason': f'semáforo en {light_state}'})
 
     # Crear infracción
+    try:
+        confidence = float(request.data.get('confidence') or 1.0)
+    except (TypeError, ValueError):
+        confidence = 1.0
+    try:
+        vehicle_count = int(request.data.get('vehicle_count') or 1)
+    except (TypeError, ValueError):
+        vehicle_count = 1
+
     intr = Infraction(
         road=road,
         traffic_light_state=light_state,
-        vehicle_count=1,
-        confidence=1.0,
+        vehicle_count=vehicle_count,
+        confidence=confidence,
         photo_b64=request.data.get('photo') or '',
         plate_number=(request.data.get('plate_number') or '').strip().upper() or None,
     )

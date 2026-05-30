@@ -1,11 +1,11 @@
 import logging
 
 from rest_framework import status, viewsets
-from rest_framework.decorators import api_view, permission_classes, action
+from rest_framework.decorators import api_view, permission_classes, action, authentication_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from usuarios.permissions import IoTApiKeyPermission, IsAuthenticatedOrIoTKey
+from usuarios.permissions import IoTApiKeyPermission
 from semaforo.models import Road
 from .models import Infraction
 from .serializers import InfractionSerializer
@@ -69,7 +69,8 @@ class InfractionViewSet(viewsets.ModelViewSet):
 
 
 @api_view(['PATCH'])
-@permission_classes([IsAuthenticatedOrIoTKey])
+@authentication_classes([])
+@permission_classes([IoTApiKeyPermission])
 def update_plate_view(request, pk):
     """
     PATCH /api/infractions/<pk>/placa/

@@ -161,6 +161,9 @@ IOT_API_KEY = config('IOT_API_KEY', default='dev-iot-secret-change-me')
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
+# No redirigir URLs sin trailing slash — evita que POST se convierta en GET
+APPEND_SLASH = False
+
 # ==============================================================================
 # Media files (infractions photos)
 # ==============================================================================

@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     'usuarios',
     'dispositivos',
     'infractions',
+    'django_rest_passwordreset',
 ]
 
 AUTH_USER_MODEL = 'usuarios.Usuario'
@@ -165,3 +166,16 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 # ==============================================================================
 MEDIA_URL  = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# ==============================================================================
+# Recuperación de contraseña — Resend + django-rest-passwordreset
+# ==============================================================================
+RESEND_API_KEY    = config('RESEND_API_KEY', default='')
+RESEND_FROM_EMAIL = config('RESEND_FROM_EMAIL', default='Semáforo Inteligente <onboarding@resend.dev>')
+FRONTEND_URL      = config('FRONTEND_URL', default='https://frontend-xi-ashen-13.vercel.app')
+
+DJANGO_REST_PASSWORDRESET_TOKEN_CONFIG = {
+    'CLASS': 'django_rest_passwordreset.tokens.RandomStringTokenGenerator',
+    'OPTIONS': {'min_length': 32, 'max_length': 32},
+}
+DJANGO_REST_MULTITOKENAUTH_RESET_TOKEN_EXPIRY_TIME = 1  # hora

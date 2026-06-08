@@ -1,6 +1,7 @@
 import logging
 
 from django.conf import settings
+from django.core.mail import EmailMultiAlternatives
 from django_rest_passwordreset.signals import reset_password_token_created
 from django.dispatch import receiver
 
@@ -12,7 +13,8 @@ def send_password_reset_email(sender, instance, reset_password_token, *args, **k
     user      = reset_password_token.user
     token     = reset_password_token.key
     reset_url = f"{settings.FRONTEND_URL}/reset-password?token={token}"
-    name      = user.first_name or user.username
+    full_name = f"{user.first_name} {user.last_name}".strip()
+    name      = full_name or user.username
 
     html_body = f"""<!DOCTYPE html>
 <html lang="es">
@@ -82,15 +84,22 @@ def send_password_reset_email(sender, instance, reset_password_token, *args, **k
 </body>
 </html>"""
 
+    text_body = (
+        f"Hola {name},\n\n"
+        f"Recibimos una solicitud para restablecer tu contraseña.\n\n"
+        f"Ingresa al siguiente enlace (válido por 1 hora):\n{reset_url}\n\n"
+        f"Si no solicitaste esto, ignora este mensaje."
+    )
+
     try:
-        import resend
-        resend.api_key = settings.RESEND_API_KEY
-        resend.Emails.send({
-            "from": settings.RESEND_FROM_EMAIL,
-            "to": [user.email],
-            "subject": "Recuperación de contraseña — Semáforo Inteligente",
-            "html": html_body,
-        })
+        msg = EmailMultiAlternatives(
+            subject="Recuperación de contraseña — Semáforo Inteligente",
+            body=text_body,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[user.email],
+        )
+        msg.attach_alternative(html_body, "text/html")
+        msg.send()
         logger.info("[PASSWORD RESET] Email enviado a %s (user=%s)", user.email, user.username)
     except Exception as exc:
         logger.error("[PASSWORD RESET] Error enviando email a %s: %s", user.email, exc)

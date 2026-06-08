@@ -171,11 +171,17 @@ MEDIA_URL  = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # ==============================================================================
-# Recuperación de contraseña — Resend + django-rest-passwordreset
+# Correo — Gmail SMTP
 # ==============================================================================
-RESEND_API_KEY    = config('RESEND_API_KEY', default='')
-RESEND_FROM_EMAIL = config('RESEND_FROM_EMAIL', default='Semáforo Inteligente <onboarding@resend.dev>')
-FRONTEND_URL      = config('FRONTEND_URL', default='https://frontend-xi-ashen-13.vercel.app')
+EMAIL_BACKEND    = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST       = 'smtp.gmail.com'
+EMAIL_PORT       = 587
+EMAIL_USE_TLS    = True
+EMAIL_HOST_USER  = config('EMAIL_HOST_USER',  default='')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+DEFAULT_FROM_EMAIL  = config('EMAIL_HOST_USER',  default='')
+
+FRONTEND_URL = config('FRONTEND_URL', default='https://frontend-xi-ashen-13.vercel.app')
 
 DJANGO_REST_PASSWORDRESET_TOKEN_CONFIG = {
     'CLASS': 'django_rest_passwordreset.tokens.RandomStringTokenGenerator',

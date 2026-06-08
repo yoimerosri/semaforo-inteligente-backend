@@ -1,7 +1,6 @@
 import logging
 
 from django.conf import settings
-from django.core.mail import EmailMultiAlternatives
 from django_rest_passwordreset.signals import reset_password_token_created
 from django.dispatch import receiver
 
@@ -21,8 +20,6 @@ def send_password_reset_email(sender, instance, reset_password_token, *args, **k
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
 <body style="margin:0;padding:40px 0;background:#02040e;font-family:Inter,system-ui,sans-serif;">
   <table align="center" width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(0,212,255,0.18);border-radius:16px;overflow:hidden;">
-
-    <!-- Cabecera -->
     <tr>
       <td style="background:linear-gradient(135deg,rgba(0,212,255,0.12) 0%,rgba(0,255,157,0.07) 100%);padding:32px;text-align:center;border-bottom:1px solid rgba(0,212,255,0.18);">
         <div style="display:inline-flex;gap:10px;margin-bottom:14px;">
@@ -38,8 +35,6 @@ def send_password_reset_email(sender, instance, reset_password_token, *args, **k
         </p>
       </td>
     </tr>
-
-    <!-- Cuerpo -->
     <tr>
       <td style="padding:36px 40px;color:rgba(255,255,255,0.82);">
         <h2 style="margin:0 0 14px;font-size:18px;color:#fff;">Hola, {name}</h2>
@@ -50,8 +45,6 @@ def send_password_reset_email(sender, instance, reset_password_token, *args, **k
         <p style="margin:0 0 28px;line-height:1.65;color:rgba(255,255,255,0.68);">
           Haz clic en el botón de abajo. El enlace es válido por <strong style="color:#fff;">1 hora</strong>.
         </p>
-
-        <!-- Botón -->
         <table width="100%" cellpadding="0" cellspacing="0">
           <tr>
             <td align="center" style="padding-bottom:28px;">
@@ -62,7 +55,6 @@ def send_password_reset_email(sender, instance, reset_password_token, *args, **k
             </td>
           </tr>
         </table>
-
         <p style="margin:0 0 8px;font-size:13px;line-height:1.6;color:rgba(255,255,255,0.45);">
           Si no solicitaste esto, ignora este mensaje. Tu contraseña no cambiará.
         </p>
@@ -71,15 +63,12 @@ def send_password_reset_email(sender, instance, reset_password_token, *args, **k
         </p>
       </td>
     </tr>
-
-    <!-- Pie -->
     <tr>
       <td style="padding:18px 40px;border-top:1px solid rgba(255,255,255,0.07);text-align:center;font-size:11px;color:rgba(255,255,255,0.28);">
         Sistema de Semáforo Inteligente · Maicao, La Guajira<br>
         Correo automático — no respondas a este mensaje.
       </td>
     </tr>
-
   </table>
 </body>
 </html>"""
@@ -92,14 +81,18 @@ def send_password_reset_email(sender, instance, reset_password_token, *args, **k
     )
 
     try:
-        msg = EmailMultiAlternatives(
-            subject="Recuperación de contraseña — Semáforo Inteligente",
-            body=text_body,
+        import sendgrid
+        from sendgrid.helpers.mail import Mail
+
+        sg = sendgrid.SendGridAPIClient(api_key=settings.SENDGRID_API_KEY)
+        message = Mail(
             from_email=settings.DEFAULT_FROM_EMAIL,
-            to=[user.email],
+            to_emails=user.email,
+            subject="Recuperación de contraseña — Semáforo Inteligente",
+            html_content=html_body,
+            plain_text_content=text_body,
         )
-        msg.attach_alternative(html_body, "text/html")
-        msg.send()
+        sg.send(message)
         logger.info("[PASSWORD RESET] Email enviado a %s (user=%s)", user.email, user.username)
     except Exception as exc:
         logger.error("[PASSWORD RESET] Error enviando email a %s: %s", user.email, exc)

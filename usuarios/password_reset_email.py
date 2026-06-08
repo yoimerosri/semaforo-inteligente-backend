@@ -1,4 +1,5 @@
 import logging
+import resend
 
 from django.conf import settings
 from django_rest_passwordreset.signals import reset_password_token_created
@@ -81,18 +82,14 @@ def send_password_reset_email(sender, instance, reset_password_token, *args, **k
     )
 
     try:
-        import sendgrid
-        from sendgrid.helpers.mail import Mail
-
-        sg = sendgrid.SendGridAPIClient(api_key=settings.SENDGRID_API_KEY)
-        message = Mail(
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            to_emails=user.email,
-            subject="Recuperación de contraseña — Semáforo Inteligente",
-            html_content=html_body,
-            plain_text_content=text_body,
-        )
-        sg.send(message)
+        resend.api_key = settings.RESEND_API_KEY
+        resend.Emails.send({
+            "from":    settings.DEFAULT_FROM_EMAIL,
+            "to":      [user.email],
+            "subject": "Recuperación de contraseña — Semáforo Inteligente",
+            "html":    html_body,
+            "text":    text_body,
+        })
         logger.info("[PASSWORD RESET] Email enviado a %s (user=%s)", user.email, user.username)
     except Exception as exc:
         logger.error("[PASSWORD RESET] Error enviando email a %s: %s", user.email, exc)

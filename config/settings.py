@@ -171,10 +171,10 @@ MEDIA_URL  = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # ==============================================================================
-# Correo — SendGrid HTTP API
+# Correo — Resend
 # ==============================================================================
-SENDGRID_API_KEY   = config('SENDGRID_API_KEY', default='')
-DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='yoimerosri201702@gmail.com')
+RESEND_API_KEY     = config('RESEND_API_KEY',     default='')
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='SemaforoIA <noreply@semaforoia.lat>')
 
 FRONTEND_URL = config('FRONTEND_URL', default='https://frontend-xi-ashen-13.vercel.app')
 

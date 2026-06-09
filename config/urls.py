@@ -28,5 +28,8 @@ urlpatterns = [
 
         # Photo-infractions (vehicles crossing on red)
         path('infractions/', include('infractions.urls')),
+
+        # System audit log
+        path('audit/', include('audit.urls')),
     ])),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

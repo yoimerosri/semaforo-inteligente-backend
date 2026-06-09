@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     'dispositivos',
     'infractions',
     'django_rest_passwordreset',
+    'audit',
 ]
 
 AUTH_USER_MODEL = 'usuarios.Usuario'

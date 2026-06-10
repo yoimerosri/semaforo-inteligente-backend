@@ -15,16 +15,17 @@ class Command(BaseCommand):
         rol = Rol.objects.create(nombre="Administrador", descripcion="Acceso completo al sistema", estado=True)
         self.stdout.write(self.style.SUCCESS(f"Rol creado: {rol.nombre}"))
 
-        admin_rec = Recurso.objects.create(nombre="Administracion", url_frontend="#", icono="fa-solid fa-gear", orden=4, estado=True)
+        admin_rec = Recurso.objects.create(nombre="Administracion", url_frontend="#", icono="fa-solid fa-gear", orden=6, estado=True)
 
         recursos_data = [
-            dict(nombre="Dashboard",        url_frontend="/dashboard",    icono="fa-solid fa-gauge",         orden=1),
-            dict(nombre="Semaforos",         url_frontend="/semaforo",     icono="fa-solid fa-traffic-light", orden=2),
-            dict(nombre="Camaras",           url_frontend="/camaras",      icono="fa-solid fa-video",         orden=3),
-            dict(nombre="Fotomultas",        url_frontend="/infractions",  icono="fa-solid fa-camera",        orden=4),
-            dict(nombre="Usuarios",          url_frontend="/usuarios",     icono="fa-solid fa-users",         orden=1, recurso_padre=admin_rec),
-            dict(nombre="Roles y Permisos",  url_frontend="/roles",        icono="fa-solid fa-user-shield",   orden=2, recurso_padre=admin_rec),
-            dict(nombre="Dispositivos IoT",  url_frontend="/dispositivos", icono="fa-solid fa-microchip",     orden=3, recurso_padre=admin_rec),
+            dict(nombre="Dashboard",        url_frontend="/dashboard",    icono="fa-solid fa-gauge",              orden=1),
+            dict(nombre="Semaforos",         url_frontend="/semaforo",     icono="fa-solid fa-traffic-light",      orden=2),
+            dict(nombre="Camaras",           url_frontend="/camaras",      icono="fa-solid fa-video",              orden=3),
+            dict(nombre="Fotomultas",        url_frontend="/infractions",  icono="fa-solid fa-camera",             orden=4),
+            dict(nombre="Auditoria",         url_frontend="/auditoria",    icono="fa-solid fa-clipboard-list",     orden=5),
+            dict(nombre="Usuarios",          url_frontend="/usuarios",     icono="fa-solid fa-users",              orden=1, recurso_padre=admin_rec),
+            dict(nombre="Roles y Permisos",  url_frontend="/roles",        icono="fa-solid fa-user-shield",        orden=2, recurso_padre=admin_rec),
+            dict(nombre="Dispositivos IoT",  url_frontend="/dispositivos", icono="fa-solid fa-microchip",          orden=3, recurso_padre=admin_rec),
         ]
 
         todos = [admin_rec]

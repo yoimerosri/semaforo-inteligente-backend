@@ -6,6 +6,7 @@ class AuditLog(models.Model):
     EVENTO_CHOICES = [
         ('LOGIN',                    'Inicio de sesión'),
         ('LOGIN_FAILED',             'Intento de login fallido'),
+        ('LOGOUT',                   'Cierre de sesión'),
         ('USER_CREATED',             'Usuario creado'),
         ('USER_UPDATED',             'Usuario actualizado'),
         ('PASSWORD_RESET_REQUESTED', 'Solicitud de restablecimiento de contraseña'),
@@ -13,6 +14,8 @@ class AuditLog(models.Model):
         ('ROLE_ASSIGNED',            'Rol asignado'),
         ('LIGHT_OVERRIDE',           'Control manual de semáforo'),
         ('LIGHT_AUTO',               'Semáforo liberado a automático'),
+        ('PAGE_VISIT',               'Visita de módulo'),
+        ('FRONTEND_ACTION',          'Acción en el sistema'),
     ]
 
     evento      = models.CharField(max_length=40, choices=EVENTO_CHOICES, db_index=True)
